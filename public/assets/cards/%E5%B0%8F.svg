@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="80" height="120" viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+  <!-- 卡片背景 -->
+  <rect width="80" height="120" rx="6" ry="6" fill="#f0e6d6" stroke="#d4b886" stroke-width="2"/>
+  
+  <!-- 装饰边框 -->
+  <rect x="4" y="4" width="72" height="112" rx="4" ry="4" fill="none" stroke="#e6d2b5" stroke-width="1"/>
+  
+  <!-- 汉字 -->
+  <text x="40" y="55" font-family="Noto Serif SC, serif" font-size="48" font-weight="bold" text-anchor="middle" fill="#000000">小</text>
+  
+  <!-- 底部装饰 -->
+  <line x1="10" y1="90" x2="70" y2="90" stroke="#d4b886" stroke-width="1"/>
+</svg>
