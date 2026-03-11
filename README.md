@@ -1,123 +1,125 @@
-# 汉字麻将 Word Mahjong
+# Word Mahjong
 
-一款基于汉字组合造句的单机麻将游戏，将传统麻将玩法与汉字文化相结合，通过组合汉字形成完整句子来获胜。
+A single-player mahjong game based on Chinese character combination, combining traditional mahjong gameplay with Chinese character culture. Win the game by combining characters to form complete sentences.
 
-![游戏首页截图](public/assets/screenshot.png)
+![Game Screenshot](public/assets/screenshot.png)
 
-## ✨ 游戏特色
+[中文版本](./README.zh-CN.md)
 
-- 🀄 **创新玩法**：传统麻将规则与汉字造句相结合，全新的游戏体验
-- 🤖 **智能AI对手**：支持1-3名AI对手，多种难度级别选择
-- 🧠 **AI裁判系统**：智能语义验证，自动判断吃牌和胡牌的合法性
-- 🎨 **精美界面**：东方美学设计，拟真麻将牌质感，流畅的动画效果，舒适的游戏体验
-- 💾 **本地存储**：所有数据保存在本地浏览器，无需服务器，支持离线运行
-- 🔧 **高度自定义**：支持自定义牌库、游戏规则、AI设置等
-- 🤝 **AI增强功能**：可选接入豆包等大模型API，获得更精准的语义验证能力
-- 📚 **牌库管理**：完整的牌库管理系统，支持导入导出、增删改查
+## ✨ Features
 
-## 🎮 游戏规则
+- 🀄 **Innovative Gameplay**: Combining traditional mahjong rules with Chinese sentence formation, offering a brand new gaming experience
+- 🤖 **Smart AI Opponents**: Support 1-3 AI opponents with multiple difficulty levels
+- 🧠 **AI Referee System**: Intelligent semantic verification automatically judges the validity of "Chi" (take) and "Hu" (win)
+- 🎨 **Exquisite Interface**: Oriental aesthetic design with realistic mahjong tile texture, smooth animations, and comfortable gaming experience
+- 💾 **Local Storage**: All data saved locally in the browser, no server required, supports offline play
+- 🔧 **Highly Customizable**: Support custom card libraries, game rules, AI settings, and more
+- 🤝 **AI Enhancement**: Optional integration with LLM APIs (Doubao, OpenAI, Claude, Gemini, etc.) for more accurate semantic verification
+- 📚 **Card Library Management**: Complete card library management system supporting import/export and CRUD operations
 
-### 基础规则
-- 游戏由1名玩家与1-3名AI对手组成
-- 牌库共148张简体中文生活高频汉字牌
-- 游戏流程：摸牌 → 组牌 → 出牌 → 吃牌/胡牌判定
-- 获胜条件：用14张牌组成一句完整合规的现代汉语句子
+## 🎮 Game Rules
 
-### 核心操作
-- **摸牌**：每回合从牌墙摸取一张牌
-- **出牌**：从手牌中打出一张不需要的牌
-- **吃牌**：下家可以吃上家打出的牌，与自己手牌组成合法词语
-- **胡牌**：当手牌可以组成完整通顺的句子时，即可胡牌获胜
+### Basic Rules
+- The game consists of 1 human player and 1-3 AI opponents
+- Card library contains 148 high-frequency simplified Chinese characters used in daily life
+- Game flow: Draw tile → Form combinations → Discard tile → "Chi"/"Hu" judgment
+- Winning condition: Form a complete and grammatically correct modern Chinese sentence with 14 tiles
 
-### 特色机制
-- 无碰无杠，专注于汉字组合的核心玩法
-- AI裁判自动验证语义合法性
-- 支持申诉功能，用户可以解释词语含义
-- 胡牌时自动添加标点符号，提升句子可读性
-- 支持调整语义验证严格程度
+### Core Operations
+- **Draw**: Draw a tile from the wall each turn
+- **Discard**: Play an unwanted tile from your hand
+- **Chi**: The next player can take the tile discarded by the previous player to form a valid word with their hand tiles
+- **Hu**: Win the game when your hand can form a complete and coherent sentence
 
-## 🚀 快速开始
+### Unique Mechanics
+- No "Peng" or "Gang" operations, focusing on the core gameplay of Chinese character combination
+- AI referee automatically verifies semantic validity
+- Support appeal function, users can explain the meaning of words
+- Automatic punctuation addition when winning, improving sentence readability
+- Adjustable semantic verification strictness
 
-### 环境要求
+## 🚀 Quick Start
+
+### Environment Requirements
 - Node.js >= 18.x
-- 现代浏览器（Chrome、Firefox、Safari、Edge等）
+- Modern browser (Chrome, Firefox, Safari, Edge, etc.)
 
-### 安装依赖
+### Install Dependencies
 ```bash
 npm install
-# 或使用 pnpm
+# or using pnpm
 pnpm install
 ```
 
-### 启动开发服务器
+### Start Development Server
 ```bash
 npm run dev
-# 或
+# or
 pnpm dev
 ```
 
-访问 http://localhost:5173 即可开始游戏。
+Visit http://localhost:5173 to start playing.
 
-### 构建生产版本
+### Build Production Version
 ```bash
 npm run build
-# 或
+# or
 pnpm build
 ```
 
-构建产物将输出到 `dist` 目录，可以直接部署到任何静态网站托管服务。
+Build output will be in the `dist` directory, which can be deployed to any static website hosting service.
 
-### 预览生产版本
+### Preview Production Version
 ```bash
 npm run preview
-# 或
+# or
 pnpm preview
 ```
 
-### AI增强功能配置（可选）
-如果需要使用AI增强功能，需要配置大模型API密钥：
+### AI Enhancement Configuration (Optional)
+To use AI enhancement features, you need to configure LLM API keys:
 
-1. 复制环境变量模板文件：
+1. Copy the environment variable template file:
 ```bash
 cp env.template .env
 ```
 
-2. 编辑 `.env` 文件，将 `YOUR_KEY_HERE` 替换为您自己的豆包API密钥：
+2. Edit the `.env` file and replace `YOUR_KEY_HERE` with your actual Doubao API key:
 ```env
 VITE_DOUBao_API_KEY=your_actual_api_key_here
 ```
 
-3. 重新启动开发服务器即可使用AI增强功能。
+3. Restart the development server to enable AI enhancement features.
 
-## 📁 项目结构
+## 📁 Project Structure
 
 ```
 WordMahjong/
 ├── src/
-│   ├── components/          # 通用组件
-│   │   ├── GameTable.tsx    # 游戏桌组件
-│   │   ├── MahjongTile.tsx  # 麻将牌组件
-│   │   ├── PlayerHand.tsx   # 玩家手牌组件
-│   │   └── LogViewer.tsx    # 日志查看器
-│   ├── pages/               # 页面组件
-│   │   ├── HomePage.tsx     # 首页
-│   │   ├── GameSettings.tsx # 游戏设置页
-│   │   ├── LibraryPage.tsx  # 牌库管理页面
-│   │   └── HelpPage.tsx     # 帮助页面
+│   ├── components/          # Common components
+│   │   ├── GameTable.tsx    # Game table component
+│   │   ├── MahjongTile.tsx  # Mahjong tile component
+│   │   ├── PlayerHand.tsx   # Player hand component
+│   │   └── LogViewer.tsx    # Log viewer
+│   ├── pages/               # Page components
+│   │   ├── HomePage.tsx     # Home page
+│   │   ├── GameSettings.tsx # Game settings page
+│   │   ├── LibraryPage.tsx  # Card library management page
+│   │   └── HelpPage.tsx     # Help page
 │   ├── hooks/               # React Hooks
-│   │   └── useGameStore.ts  # 游戏状态管理
-│   ├── services/            # 核心服务
-│   │   ├── AIService.ts     # AI对手引擎
-│   │   └── CardLibrary.ts   # 牌库管理器
-│   ├── utils/               # 工具函数
-│   │   ├── storage.ts       # 本地存储工具
-│   │   └── validation.ts    # 语义验证工具
-│   ├── types/               # 类型定义
-│   ├── App.tsx              # 根组件
-│   └── main.tsx             # 应用入口
+│   │   └── useGameStore.ts  # Game state management
+│   ├── services/            # Core services
+│   │   ├── AIService.ts     # AI opponent engine
+│   │   └── CardLibrary.ts   # Card library manager
+│   ├── utils/               # Utility functions
+│   │   ├── storage.ts       # Local storage utilities
+│   │   └── validation.ts    # Semantic validation tools
+│   ├── types/               # Type definitions
+│   ├── App.tsx              # Root component
+│   └── main.tsx             # Application entry
 ├── public/
-│   └── assets/cards/        # 麻将牌SVG资源
-├── documents/               # 项目文档
+│   └── assets/cards/        # Mahjong tile SVG resources
+├── documents/               # Project documentation
 │   ├── 产品需求文档.md
 │   ├── 技术架构文档.md
 │   ├── 游戏核心逻辑模块设计方案.md
@@ -129,105 +131,100 @@ WordMahjong/
 └── tsconfig.json
 ```
 
-## 🛠️ 技术栈
+## 🛠️ Tech Stack
 
-- **前端框架**：React 19 + TypeScript
-- **构建工具**：Vite
-- **样式方案**：Tailwind CSS 3
-- **状态管理**：Zustand
-- **图标库**：Lucide React
-- **拖拽功能**：@dnd-kit
-- **提示组件**：Sonner
-- **测试框架**：Vitest
-- **数据存储**：浏览器 LocalStorage
+- **Frontend Framework**: React 19 + TypeScript
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS 3
+- **State Management**: Zustand
+- **Icon Library**: Lucide React
+- **Drag and Drop**: @dnd-kit
+- **Toast Component**: Sonner
+- **Testing Framework**: Vitest
+- **Data Storage**: Browser LocalStorage
 
-## 🎯 核心功能
+## 🎯 Core Features
 
-### 游戏系统
-- ✅ 完整的麻将游戏流程控制
-- ✅ 1-3名AI对手对战
-- ✅ 智能AI决策系统
-- ✅ 语义验证引擎
-- ✅ 自动标点符号添加
-- ✅ 游戏状态自动保存
+### Game System
+- ✅ Complete mahjong game flow control
+- ✅ 1-3 AI opponents
+- ✅ Intelligent AI decision system
+- ✅ Semantic validation engine
+- ✅ Automatic punctuation addition
+- ✅ Auto-save game state
 
-### 牌库系统
-- ✅ 148张高频汉字牌库
-- ✅ 7大词性分类，语义平衡设计
-- ✅ 支持自定义牌库
-- ✅ 牌库导入/导出功能
-- ✅ 单字管理和分类管理
-- ✅ 牌库管理页面
+### Card Library System
+- ✅ 148 high-frequency Chinese characters
+- ✅ 7 part-of-speech categories with balanced semantic design
+- ✅ Support custom card libraries
+- ✅ Card library import/export functionality
+- ✅ Character and category management
+- ✅ Card library management page
 
-### AI增强功能（可选）
-- 🔧 支持字节跳动豆包大模型接入
-- 🔧 更精准的语义验证
-- 🔧 更智能的AI对手
-- 🔧 API密钥通过环境变量配置，隐私安全
-- 🔧 自动降级机制，网络不佳时使用本地验证
+### AI Enhancement (Optional)
+- 🔧 Support ByteDance Doubao LLM integration
+- 🔧 More accurate semantic verification
+- 🔧 Smarter AI opponents
+- 🔧 API keys configured via environment variables, privacy-safe
+- 🔧 Automatic fallback mechanism, uses local validation when network is poor
 
-## 🧪 开发相关
+## 🧪 Development
 
-### 运行测试
+### Run Tests
 ```bash
-# 运行所有测试
+# Run all tests
 npm run test
 
-# 启动UI测试界面
+# Launch UI test interface
 npm run test:ui
 
-# 生成覆盖率报告
+# Generate coverage report
 npm run test:coverage
 ```
 
-### 代码检查
+### Code Linting
 ```bash
 npm run lint
 ```
 
-## 📖 游戏说明
+## 📖 Game Guide
 
-### 牌库设计
-牌库共148张牌，分为7大分类：
-- 情感核心字（11张）：我、你、爱、家、心等
-- 高频动词（32张）：吃、喝、玩、乐、走、跑等
-- 日常名词（40张）：饭、水、茶、菜、家、书等
-- 形容词（20张）：好、美、香、甜、快、慢等
-- 副词+虚词+语气词（19张）：的、了、着、很、太、啊等
-- 场景/方位字（21张）：上、下、左、右、东、南、西、北等
-- 补充融合字（8张）：一、二、三、不、是等
+### Card Library Design
+The card library has 148 tiles divided into 7 categories:
+- Core Emotion Words (11 tiles): I, you, love, home, heart, etc.
+- High-frequency Verbs (32 tiles): eat, drink, play, joy, walk, run, etc.
+- Daily Nouns (40 tiles): rice, water, tea, food, home, book, etc.
+- Adjectives (20 tiles): good, beautiful, fragrant, sweet, fast, slow, etc.
+- Adverbs + Function Words + Modal Particles (19 tiles): of, le, zhe, very, too, ah, etc.
+- Scene/Direction Words (21 tiles): up, down, left, right, east, south, west, north, etc.
+- Supplementary Fusion Words (8 tiles): one, two, three, no, is, etc.
 
-### 游戏技巧
-1. **优先保留核心字**：人称代词、核心动词、结构助词等是造句的基础
-2. **关注词性搭配**：注意名词、动词、形容词的合理搭配
-3. **灵活使用吃牌**：通过吃牌快速组合成词语
-4. **规划句子结构**：提前构思想要组成的句子结构，有针对性地留牌
-5. **多尝试不同组合**：同样的牌可以组成多种不同的句子
+### Game Tips
+1. **Prioritize core characters**: Personal pronouns, core verbs, structural particles are the foundation of sentence construction
+2. **Pay attention to part-of-speech collocation**: Reasonable collocation of nouns, verbs, and adjectives
+3. **Use "Chi" flexibly**: Quickly form words by taking discarded tiles
+4. **Plan sentence structure**: Conceive the sentence structure you want to form in advance, keep relevant tiles accordingly
+5. **Try different combinations**: The same tiles can form multiple different sentences
 
-## 🤝 贡献指南
+## 🤝 Contributing
 
-欢迎提交Issue和Pull Request来改进这个项目！
+Issues and Pull Requests are welcome to improve this project!
 
-### 开发规范
-- 使用TypeScript保证类型安全
-- 遵循React Hooks最佳实践
-- 组件保持单一职责，不超过300行
-- 使用Tailwind CSS进行样式开发
-- 提交代码前确保通过lint和测试
+### Development Standards
+- Use TypeScript for type safety
+- Follow React Hooks best practices
+- Keep components single-responsibility, under 300 lines
+- Use Tailwind CSS for styling
+- Ensure lint and tests pass before committing code
 
-## 📄 许可证
+## 📄 License
 
 MIT License
 
-## 🙏 致谢
+## 🙏 Acknowledgments
 
-感谢所有为汉字文化传播做出贡献的人们，让更多人感受到汉字的魅力！
-
-## ⚠️ 免责声明
-
-1. 本项目仅作为学习和娱乐用途，不涉及任何商业用途。
-2. 本项目代码完全由AI生成，除项目说明文档/需求文档以外，不包含任何人工编写的部分。
+Thanks to all who contribute to Chinese cultural dissemination, helping more people experience the charm of Chinese characters!
 
 ---
 
-**享受汉字组合的乐趣，体验传统文化的创新玩法！** 🎉
+**Enjoy the fun of Chinese character combination, experience the innovative gameplay of traditional culture!** 🎉
