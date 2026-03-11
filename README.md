@@ -2,6 +2,8 @@
 
 一款基于汉字组合造句的单机麻将游戏，将传统麻将玩法与汉字文化相结合，通过组合汉字形成完整句子来获胜。
 
+![游戏首页截图](public/assets/screenshot.png)
+
 ## ✨ 游戏特色
 
 - 🀄 **创新玩法**：传统麻将规则与汉字造句相结合，全新的游戏体验
@@ -71,6 +73,21 @@ npm run preview
 # 或
 pnpm preview
 ```
+
+### AI增强功能配置（可选）
+如果需要使用AI增强功能，需要配置大模型API密钥：
+
+1. 复制环境变量模板文件：
+```bash
+cp env.template .env
+```
+
+2. 编辑 `.env` 文件，将 `YOUR_KEY_HERE` 替换为您自己的豆包API密钥：
+```env
+VITE_DOUBao_API_KEY=your_actual_api_key_here
+```
+
+3. 重新启动开发服务器即可使用AI增强功能。
 
 ## 📁 项目结构
 
