@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { X, Check, AlertCircle, Loader2, Sparkles, MessageSquare } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, Check, AlertCircle, Loader2, Sparkles, MessageSquare, GripVertical } from 'lucide-react';
 import type { ValidationResult, Card } from '../types';
 
 interface CombinationJudgeDialogProps {
@@ -22,21 +22,41 @@ const CombinationJudgeDialog: React.FC<CombinationJudgeDialogProps> = ({
   const [showAppeal, setShowAppeal] = useState(false);
   const [appealExplanation, setAppealExplanation] = useState('');
   const [isAppealing, setIsAppealing] = useState(false);
+  // 本地可拖拽排序的组合
+  const [localCombination, setLocalCombination] = useState<Card[]>([...combination]);
+  // 拖拽状态
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const dragStartY = useRef<number>(0);
 
-  const combinationText = combination.map(c => c.char).join('');
-
+  // 当弹窗打开时，重置本地组合
   useEffect(() => {
-    if (isOpen && combination.length > 0) {
-      validateCombination();
+    if (isOpen) {
+      setLocalCombination([...combination]);
+      setStatus('idle');
+      setValidationResult(null);
+      setShowAppeal(false);
+      setAppealExplanation('');
+      setIsAppealing(false);
+      setDraggedIndex(null);
+      setDragOverIndex(null);
     }
   }, [isOpen, combination]);
+
+  const combinationText = localCombination.map(c => c.char).join('');
+
+  useEffect(() => {
+    if (isOpen && localCombination.length > 0) {
+      validateCombination();
+    }
+  }, [isOpen, localCombination]);
 
   const validateCombination = async (userExplanation?: string) => {
     setStatus('validating');
     setValidationResult(null);
     
     try {
-      const result = await validateFunction(combination, userExplanation);
+      const result = await validateFunction(localCombination, userExplanation);
       setValidationResult(result);
       setStatus(result.isValid ? 'success' : 'error');
       setIsAppealing(false);
@@ -53,6 +73,46 @@ const CombinationJudgeDialog: React.FC<CombinationJudgeDialogProps> = ({
     }
   };
 
+  // 拖拽开始
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    dragStartY.current = e.clientY;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', index.toString());
+  };
+
+  // 拖拽进入
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
+    setDragOverIndex(index);
+  };
+
+  // 拖拽离开
+  const handleDragLeave = () => {
+    setDragOverIndex(null);
+  };
+
+  // 放置
+  const handleDrop = (e: React.DragEvent, toIndex: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === toIndex) return;
+
+    // 重新排序
+    const newCombination = [...localCombination];
+    const [removed] = newCombination.splice(draggedIndex, 1);
+    newCombination.splice(toIndex, 0, removed);
+    setLocalCombination(newCombination);
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  // 处理拖拽结束
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
   // 处理申诉
   const handleAppeal = async () => {
     if (!appealExplanation.trim()) {
@@ -64,6 +124,7 @@ const CombinationJudgeDialog: React.FC<CombinationJudgeDialogProps> = ({
 
   const handleConfirm = () => {
     if (validationResult) {
+      // 验证已经使用排序后的localCombination完成，直接传递结果
       onConfirm(validationResult);
     }
   };
@@ -100,19 +161,35 @@ const CombinationJudgeDialog: React.FC<CombinationJudgeDialogProps> = ({
         <div className="p-6 space-y-6 overflow-y-auto flex-grow">
           {/* 组合展示 */}
           <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-            <h3 className="text-sm font-medium text-gray-600 mb-2">您的组合：</h3>
+            <h3 className="text-sm font-medium text-gray-600 mb-2">您的组合（拖拽卡片调整顺序）：</h3>
             <div className="flex gap-2 justify-center">
-              {combination.map((card, index) => (
+              {localCombination.map((card, index) => (
                 <div
                   key={card.id}
-                  className="w-16 h-20 bg-white rounded-lg border-2 border-amber-300 shadow-md flex items-center justify-center"
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, index)}
+                  onDragOver={(e) => handleDragOver(e, index)}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, index)}
+                  onDragEnd={handleDragEnd}
+                  className={`
+                    w-16 h-20 bg-white rounded-lg border-2 shadow-md 
+                    flex flex-col items-center justify-center
+                    cursor-grab active:cursor-grabbing transition-all
+                    ${draggedIndex === index ? 'opacity-50 bg-blue-100' : ''}
+                    ${dragOverIndex === index ? 'border-blue-500 bg-blue-50 scale-105' : 'border-amber-300'}
+                  `}
                 >
+                  <GripVertical className="w-4 h-4 text-gray-400 mb-1" />
                   <span className="text-2xl font-bold text-gray-800">{card.char}</span>
                 </div>
               ))}
             </div>
             <p className="text-center mt-3 text-xl font-serif text-gray-900">
               "{combinationText}"
+            </p>
+            <p className="text-center text-xs text-gray-500 mt-2">
+              👆 按住卡片可以拖拽调整顺序
             </p>
           </div>
 

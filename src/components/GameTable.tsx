@@ -53,7 +53,8 @@ const GameTable: React.FC = () => {
   };
 
   const handleDraw = async () => {
-    if (state.status !== 'playing' || !currentPlayer.isHuman || state.turnPhase !== 'draw') return;
+    if (state.status !== 'playing' || !currentPlayer.isHuman || 
+        !(state.turnPhase === 'draw' || state.turnPhase === 'wait')) return;
 
     // 摸牌时自动放弃吃牌，清空currentDiscard
     if (state.currentDiscard) {
@@ -277,7 +278,7 @@ const GameTable: React.FC = () => {
                 <button
                   onClick={handleDraw}
                   className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg disabled:opacity-50 transition-all font-medium flex items-center gap-2 backdrop-blur-sm bg-opacity-90"
-                  disabled={state.turnPhase !== 'draw' && state.turnPhase !== 'wait'}
+                  disabled={!(state.turnPhase === 'draw' || state.turnPhase === 'wait')}
                 >
                   摸牌
                 </button>

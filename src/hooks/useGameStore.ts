@@ -111,7 +111,7 @@ const useGameStore = create<GameStore>((set, get) => ({
 
     switch (action.type) {
       case 'draw': {
-        if (store.state.turnPhase !== 'draw') {
+        if (store.state.turnPhase !== 'draw' && store.state.turnPhase !== 'wait') {
           logger.warn('GameStore', '当前阶段不能摸牌');
           return;
         }
@@ -146,24 +146,38 @@ const useGameStore = create<GameStore>((set, get) => ({
 
       case 'discard': {
         if (store.state.turnPhase !== 'play' && store.state.turnPhase !== 'discard') {
-          logger.warn('GameStore', '当前阶段不能出牌');
+          logger.warn('GameStore', '当前阶段不能出牌', { turnPhase: store.state.turnPhase });
           return;
         }
 
-        if (!action.card) return;
+        if (!action.card) {
+          logger.warn('GameStore', '出牌没有指定牌');
+          return;
+        }
         
         const cardIndex = currentPlayer.handCards.findIndex(c => c.id === action.card!.id);
-        if (cardIndex === -1) return;
+        if (cardIndex === -1) {
+          logger.warn('GameStore', '在手牌中找不到要出的牌', { 
+            cardId: action.card!.id, 
+            cardChar: action.card!.char,
+            handSize: currentPlayer.handCards.length,
+            handCards: currentPlayer.handCards.map(c => c.char)
+          });
+          return;
+        }
 
-        // 检查手牌数量：初始14张（庄家）或摸牌后14张
-        if (currentPlayer.handCards.length !== 14) {
-          logger.warn('GameStore', '手牌数量不正确，无法出牌', { 
+        // 检查手牌数量：必须至少有一张牌才能打出
+        // 吃牌后手牌数量 = 原13张 - (n-1) + 1 = 14 - n，一定小于14
+        if (currentPlayer.handCards.length === 0) {
+          logger.warn('GameStore', '手牌为空，无法出牌', { 
             handSize: currentPlayer.handCards.length 
           });
           return;
         }
 
         const discardedCard = currentPlayer.handCards.splice(cardIndex, 1)[0];
+        
+        logger.debug('GameStore', 'AI成功出牌', { char: discardedCard.char, id: discardedCard.id, remainingHand: currentPlayer.handCards.length });
         
         set(state => ({
           state: {
@@ -183,6 +197,7 @@ const useGameStore = create<GameStore>((set, get) => ({
         }));
 
         setTimeout(() => {
+          logger.debug('GameStore', '出牌完成，准备切换下一回合');
           get().nextTurn();
         }, 500);
         break;
@@ -193,6 +208,7 @@ const useGameStore = create<GameStore>((set, get) => ({
         if (!action.combination || !store.state.currentDiscard) return;
         
         // 从手牌中移除用于组合的牌（不包含打出的那张）
+        // 打出的那张直接加入吃牌组合，不需要再加到手牌
         const usedCardIds = new Set();
         action.combination.forEach(card => {
           if (card.id !== store.state.currentDiscard!.id) {
@@ -200,19 +216,24 @@ const useGameStore = create<GameStore>((set, get) => ({
             const index = currentPlayer.handCards.findIndex(c => c.id === card.id);
             if (index !== -1) {
               currentPlayer.handCards.splice(index, 1);
+              logger.debug('GameStore', '吃牌移除手牌', { char: card.char, id: card.id });
+            } else {
+              logger.warn('GameStore', '吃牌：在手牌中找不到牌', { char: card.char, id: card.id });
             }
           }
         });
 
-        // 将打出的牌加入手牌
-        currentPlayer.handCards.push(store.state.currentDiscard);
-        
-        // 添加到吃牌组合
+        // 添加到吃牌组合 - 包含了上家打出的那张牌
         currentPlayer.eatenCards.push([...action.combination]);
         
-        console.log('吃牌后手牌数量:', currentPlayer.handCards.length); // 应该是12张，需要打出一张
+        logger.debug('GameStore', '吃牌后手牌数量', { 
+          handSize: currentPlayer.handCards.length,
+          combinationSize: action.combination.length,
+          removedCount: usedCardIds.size
+        });
 
-        // 吃牌后手牌数量：原本13张 - 2张用于组合 + 1张吃的牌 = 12张，需要进入出牌阶段
+        // 吃牌后：原手牌数 - 移除数 = 新手牌数，需要打出一张
+        // 上家打出的那张已经直接进入吃牌组合，不需要再加到手牌
         set(state => ({
           state: {
             ...state.state,
@@ -275,42 +296,161 @@ const useGameStore = create<GameStore>((set, get) => ({
 
       // 如果有上家打出的牌，AI先判断是否吃牌
       if (store.state.currentDiscard) {
-        logger.debug('GameStore', 'AI判断是否吃牌', { discard: store.state.currentDiscard.char });
-        // 简单AI策略：随机决定是否吃牌（30%概率）
-        const shouldEat = Math.random() < 0.3;
+        logger.debug('GameStore', 'AI判断是否吃牌', { discard: store.state.currentDiscard.char, difficulty: currentPlayer.aiLevel });
         
-        if (shouldEat && currentPlayer.handCards.length >= 2) {
-          // 随机选择2张牌和打出的牌组合（简化逻辑）
-          const combination = [
-            store.state.currentDiscard,
-            currentPlayer.handCards[0],
-            currentPlayer.handCards[1]
-          ];
-          
-          logger.debug('GameStore', 'AI选择吃牌', { combination: combination.map(c => c.char).join('') });
-          
-          const eatAction: PlayerAction = {
-            type: 'eat',
-            playerId: store.state.currentPlayer,
-            combination,
-          };
-          
-          await get().handlePlayerAction(eatAction);
-          
-          // 吃牌后直接出牌
-          const discardCard = currentPlayer.handCards[Math.floor(Math.random() * currentPlayer.handCards.length)];
-          const discardAction: PlayerAction = {
-            type: 'discard',
-            playerId: store.state.currentPlayer,
-            card: discardCard,
-          };
-          
-          await get().handlePlayerAction(discardAction);
-          logger.info('GameStore', 'AI回合结束（吃牌）');
-          return;
+        // 根据难度设置不同的吃牌概率
+        let eatProbability = 0;
+        switch (currentPlayer.aiLevel) {
+          case 'easy':
+            eatProbability = 0; // 简单：永远不吃牌
+            break;
+          case 'normal':
+            eatProbability = 0.0; // 中等：不吃牌
+            break;
+          case 'hard':
+            eatProbability = 0.5; // 困难：80%概率尝试吃牌（如果能组成有效组合）
+            break;
+        }
+        
+        const shouldEat = Math.random() < eatProbability;
+        
+        if (shouldEat && currentPlayer.handCards.length >= 1) { // 至少要有一张牌才能吃
+          // 对于困难难度，需要先验证组合是否有效
+          if (currentPlayer.aiLevel === 'hard') {
+            // 尝试所有可能的组合，找出能组成有效组合的
+            const possibleCombinations: Card[][] = [];
+            // 尝试所有 n-1 张手牌和打出的牌组合，n从2到3
+            for (let n = 1; n <= 2 && n < currentPlayer.handCards.length; n++) {
+              // 简单起见，选前n张组合
+              const combination = [store.state.currentDiscard, ...currentPlayer.handCards.slice(0, n)];
+              possibleCombinations.push(combination);
+            }
+            
+            // 找到第一个有效的组合
+            let validCombination: Card[] | null = null;
+            for (const combo of possibleCombinations) {
+              const result = await get().validateCombination(combo);
+              if (result.isValid) {
+                validCombination = combo;
+                break;
+              }
+            }
+            
+            if (validCombination) {
+              logger.debug('GameStore', '困难AI选择吃牌', { combination: validCombination.map(c => c.char).join('') });
+              const eatAction: PlayerAction = {
+                type: 'eat',
+                playerId: store.state.currentPlayer,
+                combination: validCombination,
+              };
+              
+              await get().handlePlayerAction(eatAction);
+              
+              // 吃牌后需要重新获取最新的玩家数据，因为引用已经变了
+              const updatedStore = get();
+              const updatedPlayer = updatedStore.state.players[updatedStore.state.currentPlayer];
+              
+              // 吃牌后直接出牌，从更新后的手牌中选择
+              if (updatedPlayer.handCards.length > 0) {
+                logger.debug('GameStore', 'AI吃牌后准备出牌', { 
+                  handSize: updatedPlayer.handCards.length,
+                  playerId: updatedStore.state.currentPlayer
+                });
+                
+                let discardCard: Card;
+                if (updatedPlayer.aiLevel === 'hard') {
+                  discardCard = await get().aiHardStrategy(updatedPlayer);
+                } else {
+                  // 中等难度：按频率选择，打出频率最低的牌
+                  // 复制一份，按frequency升序排序（频率越低越先打出）
+                  const sortedByFreq = [...updatedPlayer.handCards].sort((a, b) => a.frequency - b.frequency);
+                  discardCard = sortedByFreq[0];
+                }
+                
+                logger.debug('GameStore', 'AI选择出牌', { char: discardCard.char, id: discardCard.id });
+                const discardAction: PlayerAction = {
+                  type: 'discard',
+                  playerId: updatedStore.state.currentPlayer,
+                  card: discardCard,
+                };
+                
+                await get().handlePlayerAction(discardAction);
+                logger.info('GameStore', 'AI回合结束（吃牌）');
+              } else {
+                // 如果手牌为空（异常情况），直接切换回合
+                logger.error('GameStore', 'AI吃牌后手牌为空，强制切换回合');
+                setTimeout(() => {
+                  get().nextTurn();
+                }, 500);
+              }
+              return;
+            }
+            
+            // 没有找到有效组合，不吃牌，继续正常摸牌
+            logger.debug('GameStore', '困难AI没有找到有效组合，不吃牌');
+          } else {
+            // 简单/中等难度：随机选择前n-1张组合
+            const needCards = Math.floor(Math.random() * 2) + 1; // 1或2张，组成2或3张组合
+            if (currentPlayer.handCards.length >= needCards) {
+              const combination = [
+                store.state.currentDiscard,
+                ...currentPlayer.handCards.slice(0, needCards)
+              ];
+              
+              logger.debug('GameStore', 'AI选择吃牌', { combination: combination.map(c => c.char).join('') });
+              
+              const eatAction: PlayerAction = {
+                type: 'eat',
+                playerId: store.state.currentPlayer,
+                combination,
+              };
+              
+              await get().handlePlayerAction(eatAction);
+              
+              // 吃牌后需要重新获取最新的玩家数据，因为引用已经变了
+              const updatedStore = get();
+              const updatedPlayer = updatedStore.state.players[updatedStore.state.currentPlayer];
+              
+              // 吃牌后直接出牌，从更新后的手牌中选择
+              if (updatedPlayer.handCards.length > 0) {
+                logger.debug('GameStore', 'AI吃牌后准备出牌', { 
+                  handSize: updatedPlayer.handCards.length,
+                  playerId: updatedStore.state.currentPlayer
+                });
+                
+                let discardCard: Card;
+                if (updatedPlayer.aiLevel === 'normal') {
+                  // 中等难度：按频率选择，打出频率最低的牌
+                  const sortedByFreq = [...updatedPlayer.handCards].sort((a, b) => a.frequency - b.frequency);
+                  discardCard = sortedByFreq[0];
+                  logger.debug('GameStore', '中等AI按频率选择出牌', { char: discardCard.char, frequency: discardCard.frequency });
+                } else {
+                  // 简单难度：随机出牌
+                  discardCard = updatedPlayer.handCards[Math.floor(Math.random() * updatedPlayer.handCards.length)];
+                }
+                
+                logger.debug('GameStore', 'AI选择出牌', { char: discardCard.char, id: discardCard.id });
+                const discardAction: PlayerAction = {
+                  type: 'discard',
+                  playerId: updatedStore.state.currentPlayer,
+                  card: discardCard,
+                };
+                
+                await get().handlePlayerAction(discardAction);
+                logger.info('GameStore', 'AI回合结束（吃牌）');
+              } else {
+                // 如果手牌为空（异常情况），直接切换回合
+                logger.error('GameStore', 'AI吃牌后手牌为空，强制切换回合');
+                setTimeout(() => {
+                  get().nextTurn();
+                }, 500);
+              }
+              return;
+            }
+          }
         }
       }
-
+  
       // 没有吃牌，正常摸牌
       logger.debug('GameStore', 'AI摸牌');
       const drawAction: PlayerAction = {
@@ -321,20 +461,30 @@ const useGameStore = create<GameStore>((set, get) => ({
 
       let discardCard: Card;
       
-      if (currentPlayer.aiLevel === 'hard') {
+      // 摸牌后重新获取最新的玩家数据
+      const updatedStore = get();
+      const updatedPlayer = updatedStore.state.players[updatedStore.state.currentPlayer];
+      
+      if (updatedPlayer.aiLevel === 'hard') {
         // 困难难度：使用大模型分析，策略性出牌
         logger.debug('GameStore', '困难AI，使用语义分析选择出牌');
-        discardCard = await get().aiHardStrategy(currentPlayer);
+        discardCard = await get().aiHardStrategy(updatedPlayer);
+      } else if (updatedPlayer.aiLevel === 'normal') {
+        // 中等难度：按使用频率出牌，打出频率最低的牌
+        logger.debug('GameStore', '中等AI，按频率选择出牌');
+        const sortedByFreq = [...updatedPlayer.handCards].sort((a, b) => a.frequency - b.frequency);
+        discardCard = sortedByFreq[0];
+        logger.debug('GameStore', '中等AI选择出牌', { char: discardCard.char, frequency: discardCard.frequency });
       } else {
-        // 简单/普通难度：随机出牌
+        // 简单难度：完全随机出牌
         logger.debug('GameStore', '简单AI，随机出牌');
-        discardCard = currentPlayer.handCards[Math.floor(Math.random() * currentPlayer.handCards.length)];
+        discardCard = updatedPlayer.handCards[Math.floor(Math.random() * updatedPlayer.handCards.length)];
       }
 
-      logger.debug('GameStore', 'AI出牌', { card: discardCard.char, difficulty: currentPlayer.aiLevel });
+      logger.debug('GameStore', 'AI出牌', { card: discardCard.char, difficulty: updatedPlayer.aiLevel });
       const discardAction: PlayerAction = {
         type: 'discard',
-        playerId: store.state.currentPlayer,
+        playerId: updatedStore.state.currentPlayer,
         card: discardCard,
       };
       await get().handlePlayerAction(discardAction);
