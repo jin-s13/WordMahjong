@@ -6,6 +6,12 @@
 
 ![游戏首页截图](public/assets/screenshot.png)
 
+灵感来源：
+
+[《快乐老友·有风季》有风日记第3期：厚米团大湾仔文字麻将battle](https://www.youtube.com/watch?v=T6k7N4BC1F0)
+
+[【文字麻将🀄】麻将游戏变“瞎掰”能力大比拼？白鹿带花如月上跑男了！ | 奔跑吧天路篇 EP6 20251227](https://www.youtube.com/watch?v=fv7R8Tq-7TE)
+
 ## ✨ 游戏特色
 
 - 🀄 **创新玩法**：传统麻将规则与汉字造句相结合，全新的游戏体验
