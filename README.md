@@ -6,6 +6,10 @@ A single-player mahjong game based on Chinese character combination, combining t
 
 [中文版本](./README.zh-CN.md)
 
+Ideas from great variety shows:
+[《快乐老友·有风季》有风日记第3期：厚米团大湾仔文字麻将battle](https://www.youtube.com/watch?v=T6k7N4BC1F0)
+[【文字麻将🀄】麻将游戏变“瞎掰”能力大比拼？白鹿带花如月上跑男了！ | 奔跑吧天路篇 EP6 20251227](https://www.youtube.com/watch?v=fv7R8Tq-7TE)
+
 ## ✨ Features
 
 - 🀄 **Innovative Gameplay**: Combining traditional mahjong rules with Chinese sentence formation, offering a brand new gaming experience
